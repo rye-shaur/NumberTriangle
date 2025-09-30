@@ -114,8 +114,16 @@ public class NumberTriangle {
      *
      */
     public int retrieve(String path) {
-        // TODO implement this method
-        return -1;
+        NumberTriangle currNode = this;
+        for (char c : path.toCharArray()) {
+            if (c == 'l') {
+                currNode = currNode.left;
+            } else if (c == 'r') {
+                currNode = currNode.right;
+            }
+        }
+
+        return currNode.getRoot();
     }
 
     /** Read in the NumberTriangle structure from a file.
