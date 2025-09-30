@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This is the provided NumberTriangle class to be used in this coding task.
@@ -63,7 +65,31 @@ public class NumberTriangle {
      * Note: a NumberTriangle contains at least one value.
      */
     public void maxSumPath() {
-        // for fun [not for credit]:
+
+        this.root = maxSumHelper(this);
+        this.left = null;
+        this.right = null;
+
+    }
+
+    // helper for maxSumPath: returns max path sum for node (does NOT modify the node or its children)
+    private static int maxSumHelper(NumberTriangle node) {
+
+        if (node.isLeaf()) {
+            return node.getRoot();
+        }
+
+        int rightSum = 0;
+        if (node.right != null) {
+            rightSum += maxSumHelper(node.right);
+        }
+
+        int leftSum = 0;
+        if (node.left != null) {
+            leftSum += maxSumHelper(node.left);
+        }
+
+        return node.getRoot() + Math.max(leftSum, rightSum);
     }
 
 
@@ -107,27 +133,48 @@ public class NumberTriangle {
         // open the file and get a BufferedReader object whose methods
         // are more convenient to work with when reading the file contents.
         InputStream inputStream = NumberTriangle.class.getClassLoader().getResourceAsStream(fname);
+
+        if (inputStream == null) {
+            throw new FileNotFoundException("File Not Found: " + fname);
+        }
+
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
-
-        // TODO define any variables that you want to use to store things
+        List<List<NumberTriangle>> levels = new ArrayList<>();
 
         // will need to return the top of the NumberTriangle,
         // so might want a variable for that.
         NumberTriangle top = null;
 
-        String line = br.readLine();
-        while (line != null) {
+        try {
+            String line = br.readLine();
+            while (line != null) {
+                String[] numbers = line.trim().split("\\s+");
+                List<NumberTriangle> row = new ArrayList<>();
+                for (String number : numbers) {
+                    row.add(new NumberTriangle(Integer.parseInt(number)));
+                }
+                levels.add(row);
 
-            // remove when done; this line is included so running starter code prints the contents of the file
-            System.out.println(line);
-
-            // TODO process the line
-
-            //read the next line
-            line = br.readLine();
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            br.close();
+            throw new IOException("Error reading file: " + fname, e);
         }
+
         br.close();
+
+        for (int i = 0; i < levels.size() - 1; i++) {
+            List<NumberTriangle> currRow = levels.get(i);
+            List<NumberTriangle> nextRow = levels.get(i + 1);
+            for (int j = 0; j < currRow.size(); j++) {
+                currRow.get(j).setLeft(nextRow.get(j));
+                currRow.get(j).setRight(nextRow.get(j + 1));
+            }
+        }
+
+        top = levels.get(0).get(0);
         return top;
     }
 
